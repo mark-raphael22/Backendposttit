@@ -1,0 +1,92 @@
+ **Today **
+ 
+ const app = express();
+const port=process.env.PORT||3000
+ const notfoundroute=require('./middleware/notfoundroute')
+
+//middleware
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+
+//public route 
+app.use('/api/v1',userRouter)
+
+
+const startServer= async() =>{
+    try{
+      await mongoose.connect(process.env.MON_URI)  
+      app.listen(port,()=>{
+        console.log(`server listening on  port ${port}`)
+      })
+    }catch(error){
+
+    }
+}
+startServer()
+
+
+
+*****Schema**
+
+const mongoose =require("mongoose");
+const Schema = mongoose.Schema;
+const bycrypt = require('bycrypt')
+
+const userSchema= new Schema({
+    username:{
+            type:"string",
+            required:true,
+    },
+    email:{
+    type:"string",
+    required:[true,'please  enter a valid email']
+    unique:true,
+     match:[/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,"please provide a email"]
+},
+ password:{
+    type:'string',
+    required:[true,'please provide a password '  ]
+    miinlength:[10,'minlenght of 10']
+ }
+},{timestamp:true})
+
+userSchema.pre('save',async function (next){
+    const salt =await bycrypt.gensalt()
+
+    this.password=await bycrypt.hash(this.password,salt);
+    next();
+
+})
+
+    userSchema.method.comparepassword=( async function (userpassword){
+            const iscorrect= await bycrypt.compare(userpassword.this.password);
+            return iscorrect;
+    })
+
+    userSchema.method.genToken=function(){
+    return jwt.sign({userId:this_id,username:this_username}process.env.jwt_secret,{expiresIn:'3d'})
+    }
+
+
+module.exports=mongoose.model(user,userSchema)
+
+
+
+
+
+**sleep**
+
+|**Contunie|**
+
+controller ,route
+
+**error handing**
+
+**image upload**
+
+**request query**
+
+**revision**
+
+
+
